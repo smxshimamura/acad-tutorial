@@ -1,4 +1,4 @@
 # AutoCAD API Tutorial
 
-This is a repository for learning the ACAD2013API.
+This is a repository for learning the AutoCAD API.
 
