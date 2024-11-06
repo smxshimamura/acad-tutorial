@@ -39,7 +39,7 @@ namespace Lesson5
         public const string ModelSpace = "*MODEL_SPACE";
 
         /// <summary>
-        /// Creates the circle.
+        /// Execute ShowPalette command.
         /// </summary>
         [CommandMethod("Tutorials", "ShowPalette", "ShowPaletteId", CommandFlags.Modal)]
         public void ShowPalette()
