@@ -59,28 +59,67 @@ public:
 
 	virtual void RegisterServerComponents () {
 	}
-	
-	// The ACED_ARXCOMMAND_ENTRY_AUTO macro can be applied to any static member 
-	// function of the ARXTrainingApp class.
-	// The function should take no arguments and return nothing.
-	//
-	// NOTE: ACED_ARXCOMMAND_ENTRY_AUTO has overloads where you can provide resourceid and
-	// have arguments to define context and command mechanism.
-	
-	// ACED_ARXCOMMAND_ENTRY_AUTO(classname, group, globCmd, locCmd, cmdFlags, UIContext)
-	// ACED_ARXCOMMAND_ENTRYBYID_AUTO(classname, group, globCmd, locCmdId, cmdFlags, UIContext)
-	// only differs that it creates a localized name using a string in the resource file
-	//   locCmdId - resource ID for localized command
 
-	// Modal Command with localized name
-	// ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, MyCommand, MyCommandLocal, ACRX_CMD_MODAL)
 	static void ADSKMyGroupMyCommand () {
-		// Put your command code here
 		acutPrintf(_T("\r\nHello World!\r\n"));
 	}
 
+	static void ADSKMyGroupEX2() {
+		const AcGePoint3d pt(50.0, 50.0, 0.0);
+		const AcGeVector3d vec(0.0, 0.0, 1.0);
+		constexpr double rad = 50.0;
+		auto* pCircle = new AcDbCircle(pt, vec, rad);
+		auto* pDb = acdbHostApplicationServices()->workingDatabase();
+
+		AcDbBlockTable* pTbl;
+		pDb->getBlockTable(pTbl, AcDb::kForRead);
+
+		AcDbBlockTableRecord* pRec;
+		pTbl->getAt(MODEL_SPACE, pRec, AcDb::kForWrite);
+
+		pTbl->close();
+		pRec->appendAcDbEntity(pCircle);
+		pRec->close();
+		pCircle->close();
+	}
+
+	static void ADSKMyGroupEX3() {
+		acedInitGet(RSG_NONULL, nullptr);
+		ads_point adsMid;
+		auto status = acedGetPoint(nullptr, _T("\nSet start:"), adsMid);
+		if (status != RTNORM) return;
+		const AcGePoint3d pt(adsMid[X], adsMid[Y], adsMid[Z]);
+		acutPrintf(_T("%d, %d\r\n"), pt.x, pt.y);
+
+		ads_point adsEnd;
+		status = acedGetPoint(adsMid, _T("\nSet radius:"), adsEnd);
+		if (status != RTNORM) return;
+		const AcGePoint3d tp(adsEnd[X], adsEnd[Y], adsEnd[Z]);
+						
+		const double rad = pt.distanceTo(tp);
+		acutPrintf(_T("%d\r\n"), rad);
+		const AcGeVector3d vec(0.0, 0.0, 1.0);
+
+		auto* pCircle = new AcDbCircle(pt, vec, rad);
+
+		auto* pDb = acdbHostApplicationServices()->workingDatabase();
+
+		AcDbBlockTable* pTbl;
+		pDb->getBlockTable(pTbl, AcDb::kForRead);
+
+		AcDbBlockTableRecord* pRec;
+		pTbl->getAt(MODEL_SPACE, pRec, AcDb::kForWrite);
+
+		pTbl->close();
+		pRec->appendAcDbEntity(pCircle);
+		pRec->close();
+		pCircle->close();
+	}
 } ;
 
 //-----------------------------------------------------------------------------
 IMPLEMENT_ARX_ENTRYPOINT(ARXTrainingApp)
 ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, MyCommand, MyCommand, ACRX_CMD_MODAL, NULL)
+ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX2, EX2, ACRX_CMD_MODAL, NULL)
+ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX3, EX3, ACRX_CMD_MODAL, NULL)
+
