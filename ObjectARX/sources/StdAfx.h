@@ -51,6 +51,7 @@
 #define _WIN32_WINNT 0x0601
 #endif
 
+#include <memory>
     
 //- ObjectARX and OMF headers needs this
 #include <map>
@@ -71,6 +72,7 @@
 //#define _ARX_CUSTOM_DRAG_N_DROP_	//- Support for the ObjectARX Drag'n Drop API
 //#define _INC_LEAGACY_HEADERS_			//- Include legacy headers in this project
 #include "arxHeaders.h"
+#include "AcCmColor.h"
 #include "common.h"
 
 #pragma pack(pop)
