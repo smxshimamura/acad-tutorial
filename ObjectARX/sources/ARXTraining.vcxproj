@@ -79,6 +79,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="acrxEntryPoint.cpp" />
+    <ClCompile Include="ADSKMyEntity.cpp" />
+    <ClCompile Include="DocData.cpp" />
+    <ClCompile Include="DocData.h" />
+    <ClCompile Include="ADSKMyDbReactor.cpp" />
+    <ClCompile Include="CMyDlg.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -86,6 +91,9 @@
     <ClCompile Include="ARXTraining.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ADSKMyDbReactor.h" />
+    <ClInclude Include="ADSKMyEntity.h" />
+    <ClInclude Include="CMyDlg.h" />
     <ClInclude Include="common.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="StdAfx.h" />

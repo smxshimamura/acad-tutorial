@@ -73,6 +73,6 @@
 //#define _INC_LEAGACY_HEADERS_			//- Include legacy headers in this project
 #include "arxHeaders.h"
 #include "AcCmColor.h"
-#include "common.h"
+#include "AcExtensionModule.h"
 
 #pragma pack(pop)

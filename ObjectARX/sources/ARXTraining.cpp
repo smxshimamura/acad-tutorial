@@ -23,8 +23,6 @@
 //- ARXTrainingApp.cpp : Initialization functions
 //-----------------------------------------------------------------------------
 #include "StdAfx.h"
-#include "resource.h"
-#include <afxdllx.h>
 
 //-----------------------------------------------------------------------------
 //- Define the sole extension module object.

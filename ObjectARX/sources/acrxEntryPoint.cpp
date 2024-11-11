@@ -23,9 +23,15 @@
 //----- acrxEntryPoint.cpp
 //-----------------------------------------------------------------------------
 #include "StdAfx.h"
+#include "resource.h"
+#include "common.h"
+#include "ADSKMyDbReactor.h"
+#include "ADSKMyEntity.h"
+#include "CMyDlg.h"
 
 //-----------------------------------------------------------------------------
 #define szRDS _RXST("ADSK")
+
 using namespace std;
 
 //-----------------------------------------------------------------------------
@@ -33,8 +39,8 @@ using namespace std;
 class ARXTrainingApp : public AcRxArxApp {
 
 public:
+	ARXTrainingApp() { }
 	virtual ~ARXTrainingApp() = default;
-	ARXTrainingApp() {}
 
 	virtual AcRx::AppRetCode On_kInitAppMsg (void *pkt) {
 		// TODO: Load dependencies here
@@ -43,6 +49,7 @@ public:
 		AcRx::AppRetCode retCode =AcRxArxApp::On_kInitAppMsg (pkt) ;
 		
 		// TODO: Add your initialization code here
+		
 
 		return (retCode) ;
 	}
@@ -298,9 +305,7 @@ public:
 		if (stat == eOk) {
 			acutPrintf(_T("[Named Object Dictionary]\r\n"));
 			const auto pItr = pDict->newIterator();
-			AcDbObject* pObj;
 			for (; !pItr->done(); pItr->next()) {				
-				TCHAR* pszName;
 				if (stat == eOk) {
 					acutPrintf(_T("  %s\r\n"), pItr->name());
 				}
@@ -312,6 +317,71 @@ public:
 	}	
 
 #pragma endregion
+
+#pragma region Lesson6
+
+	static void ADSKMyGroupEX6() {
+		CAcModuleResourceOverride resOverride;
+		const auto pDlg = new CMyDlg(acedGetAcadFrame());
+		pDlg->Create(IDD_DIALOG1);
+		pDlg->ShowWindow(SW_SHOW);
+	}
+
+#pragma endregion
+
+#pragma region Lesson7
+
+	static void ADSKMyGroupEX7a() {
+		const auto pDb = acdbHostApplicationServices()->workingDatabase();
+		DocVars.docData().pDbReactor = new ADSKMyDbReactor(pDb);
+	}
+
+	static void ADSKMyGroupEX7b() {
+		delete DocVars.docData().pDbReactor;
+	}
+#pragma endregion
+
+#pragma region Lesson8
+
+	static void ADSKMyGroupEX8() {
+		ads_point ptVex1;
+		auto res = acedGetPoint(nullptr, _T("Set vertex1:"), ptVex1);
+		if (res != RTNORM) return;
+
+		ads_point ptVex2;
+		res = acedGetPoint(ptVex1, _T("\r\nSet vertex2:"), ptVex2);
+		if (res != RTNORM) return;
+
+		ads_point ptVex3;
+		res = acedGetPoint(ptVex2, _T("\r\nSet vertex3:"), ptVex3);
+		if (res != RTNORM) return;
+
+		ADSKMyEntity* pEnt = nullptr;
+		AcDbBlockTable* pTbl = nullptr;
+		AcDbBlockTableRecord* pRec = nullptr;
+		{
+			pEnt = new ADSKMyEntity();
+			pEnt->setVertex1(AcGePoint3d(ptVex1[X], ptVex1[Y], ptVex1[Z]));
+			pEnt->setVertex2(AcGePoint3d(ptVex2[X], ptVex2[Y], ptVex2[Z]));
+			pEnt->setVertex3(AcGePoint3d(ptVex3[X], ptVex3[Y], ptVex3[Z]));
+
+			const auto pDb = acdbHostApplicationServices()->workingDatabase();
+			auto stat = pDb->getBlockTable(pTbl, kForRead);
+			if (stat != eOk) goto finally;
+
+			stat = pTbl->getAt(MODEL_SPACE, pRec, kForWrite);
+			if (stat != eOk) goto finally;
+
+			stat = pRec->appendAcDbEntity(pEnt);
+			if (stat != eOk) goto finally;
+		}
+		finally:
+		if (pRec != nullptr) pRec->close();
+		if (pTbl != nullptr) pTbl->close();
+		if (pEnt != nullptr) pEnt->close();
+	}
+
+#pragma endregion
 } ;
 
 //-----------------------------------------------------------------------------
@@ -321,3 +391,7 @@ ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX2, EX2, ACRX_CMD_MODAL
 ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX3, EX3, ACRX_CMD_MODAL, NULL)
 ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX4, EX4, ACRX_CMD_MODAL | ACRX_CMD_USEPICKSET, NULL)
 ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX5, EX5, ACRX_CMD_MODAL, NULL)
+ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX6, EX6, ACRX_CMD_TRANSPARENT, NULL)
+ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX7a, EX7a, ACRX_CMD_TRANSPARENT, NULL)
+ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX7b, EX7b, ACRX_CMD_TRANSPARENT, NULL)
+ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX8, EX8, ACRX_CMD_MODAL, NULL)
