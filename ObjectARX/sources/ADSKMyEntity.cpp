@@ -22,8 +22,7 @@ ADSKMyEntity::ADSKMyEntity() {
     m_Vertex3.set(0.0, 0.0, 0.0);
 }
 
-ADSKMyEntity::~ADSKMyEntity() {
-}
+ADSKMyEntity::~ADSKMyEntity() = default;
 
 //-----------------------------------------------------------------------------
 //----- AcDbObject protocols

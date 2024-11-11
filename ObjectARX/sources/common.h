@@ -1,4 +1,4 @@
-#include "ADSKMyDbReactor.h"
+#pragma once
 #include "DocData.h"
 
 #define MODEL_SPACE _T("*MODEL_SPACE")

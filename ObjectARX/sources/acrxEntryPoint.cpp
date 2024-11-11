@@ -110,7 +110,7 @@ public:
 	static void ADSKMyGroupEX3() {
 		AcDbBlockTable* pTbl = nullptr;
 		AcDbBlockTableRecord* pRec = nullptr;
-		AcDbCircle* pCircle = nullptr;
+		AcDbCircle* pCircle;
 		{
 			acedInitGet(RSG_NONULL, nullptr);
 			ads_point adsMid;
@@ -332,12 +332,11 @@ public:
 #pragma region Lesson7
 
 	static void ADSKMyGroupEX7a() {
-		const auto pDb = acdbHostApplicationServices()->workingDatabase();
-		DocVars.docData().pDbReactor = new ADSKMyDbReactor(pDb);
+		DocVars.docData().attachDatabase(acdbHostApplicationServices()->workingDatabase());
 	}
 
 	static void ADSKMyGroupEX7b() {
-		delete DocVars.docData().pDbReactor;
+		DocVars.docData().detachDatabase();
 	}
 #pragma endregion
 
@@ -356,7 +355,7 @@ public:
 		res = acedGetPoint(ptVex2, _T("\r\nSet vertex3:"), ptVex3);
 		if (res != RTNORM) return;
 
-		ADSKMyEntity* pEnt = nullptr;
+		ADSKMyEntity* pEnt;
 		AcDbBlockTable* pTbl = nullptr;
 		AcDbBlockTableRecord* pRec = nullptr;
 		{
@@ -384,7 +383,6 @@ public:
 #pragma endregion
 } ;
 
-//-----------------------------------------------------------------------------
 IMPLEMENT_ARX_ENTRYPOINT(ARXTrainingApp)
 ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, MyCommand, MyCommand, ACRX_CMD_MODAL, NULL)
 ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX2, EX2, ACRX_CMD_MODAL, NULL)

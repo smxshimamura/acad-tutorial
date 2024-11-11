@@ -3,7 +3,7 @@
 // Used by ARXTraining.rc
 //
 #define IDS_PROJNAME                    100
-#define ID_OK                           100
+#define ID_OK                           101
 #define IDD_DIALOG1                     106
 
 // Next default values for new objects

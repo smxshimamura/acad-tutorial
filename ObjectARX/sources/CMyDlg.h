@@ -12,7 +12,6 @@ public:
 	CMyDlg(CMyDlg&) = delete;
 	~CMyDlg() override;
 
-// Dialog Data
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_DIALOG1 };
 #endif
