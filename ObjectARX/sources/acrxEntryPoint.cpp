@@ -25,8 +25,8 @@
 #include "StdAfx.h"
 #include "resource.h"
 #include "common.h"
-#include "ADSKMyDbReactor.h"
 #include "ADSKMyEntity.h"
+#include "ADSKMyCircle.h"
 #include "CMyDlg.h"
 
 //-----------------------------------------------------------------------------
@@ -381,6 +381,133 @@ public:
 	}
 
 #pragma endregion
+
+#pragma region Lesson9
+
+	static void ADSKMyGroupEX9() {
+		const auto pDb = new AcDbDatabase(false);
+		{
+			const auto pFile = _T("C:\\tmp\\test.dwg");
+			AcDbBlockTable* pTbl = nullptr;
+			AcDbBlockTableRecord* pRec = nullptr;
+			AcDbLine* pLine = nullptr;
+			{
+				auto stat = pDb->readDwgFile(pFile);
+				if (stat != eOk) goto finally;
+
+				stat = pDb->getBlockTable(pTbl, kForRead);
+				if (stat != eOk) goto finally;
+
+				stat = pTbl->getAt(MODEL_SPACE, pRec, kForWrite);
+				if (stat != eOk) goto finally;
+
+				const AcGePoint3d ptStat(0.0, 0.0, 0.0);
+				const AcGePoint3d ptEnd(500.0, 500.0, 1.0);
+				pLine = new AcDbLine(ptStat, ptEnd);
+				stat = pRec->appendAcDbEntity(pLine);
+				if (stat != eOk) goto finally;
+
+			}
+			finally:
+			if (pLine != nullptr) pLine->close();
+			if (pRec != nullptr) pRec->close();
+			if (pTbl != nullptr) pTbl->close();
+
+			pDb->saveAs(pFile);
+		}
+		delete pDb;
+	}
+
+#pragma endregion
+
+#pragma region Lesson10
+
+	static void ADSKMyGroupEX10() {
+		ads_name sSet;
+		auto res = acedSSGet(nullptr, nullptr, nullptr, nullptr, sSet);
+		if (res != RTNORM) return;
+
+		int nTotal;
+		res = acedSSLength(sSet, &nTotal);
+		if (res != RTNORM) return;
+
+		AcDbObjectId objId;
+		AcDbObjectIdArray objIdAry;
+		int stat;
+		for (long nIndex = 0; nIndex < nTotal; nIndex++) {
+			ads_name name;
+			res = acedSSName(sSet, nIndex, name);
+			if (res != RTNORM) continue;
+			
+			stat = acdbGetObjectId(objId, name);
+			if (stat != eOk) continue;
+
+			objIdAry.append(objId);
+		}
+
+		const auto pExtDb = new AcDbDatabase(false);
+		{
+			const auto pFile = _T("C:\\tmp\\test.dwg");
+			stat = pExtDb->readDwgFile(pFile);
+			if (stat != eOk) goto finally;
+
+			const auto pCurDb = acdbHostApplicationServices()->workingDatabase();
+			AcDbDatabase* pTmpDb;
+			{
+				stat = pCurDb->wblock(pTmpDb, objIdAry, AcGePoint3d::kOrigin);
+				if (stat != eOk) goto finally;
+
+				stat = pExtDb->insert(AcGeMatrix3d::kIdentity, pTmpDb);
+				if (stat != eOk) goto finally;
+
+				pExtDb->saveAs(pFile);
+			}
+			finally:
+			delete pTmpDb;
+		}
+		delete pExtDb;
+	}
+
+#pragma endregion
+
+#pragma region Lesson11
+
+	static void ADSKMyGroupEX11() {
+		ads_point ptCenter;
+		auto res = acedGetPoint(nullptr, _T("\r\nSet Center:"), ptCenter);
+		if (res != RTNORM) return;
+
+		double dRadius;
+		res = acedGetDist(ptCenter, _T("\r\nSet radius:"), &dRadius);
+		if (res != RTNORM) return;
+
+		const AcGePoint3d pt(ptCenter[X], ptCenter[Y], ptCenter[Z]);
+		const auto pCircle = new ADSKMyCircle();
+		pCircle->setCenter(pt);
+		pCircle->setRadius(dRadius);
+		pCircle->setColorIndex(1);
+
+		const auto pDb = acdbHostApplicationServices()->workingDatabase();
+
+		AcDbBlockTable* pTbl = nullptr;
+		AcDbBlockTableRecord* pRec = nullptr;
+		{
+			auto stat = pDb->getBlockTable(pTbl, kForRead);
+			if (stat != eOk) goto finally;
+
+			stat = pTbl->getAt(MODEL_SPACE, pRec, kForWrite);
+			if (stat != eOk) goto finally;
+
+			pRec->appendAcDbEntity(pCircle);
+		}
+		finally:
+		if (pRec != nullptr) pRec->close();
+		if (pTbl != nullptr) pTbl->close();
+
+		pCircle->close();
+	}
+
+#pragma endregion
 } ;
 
 IMPLEMENT_ARX_ENTRYPOINT(ARXTrainingApp)
@@ -393,3 +520,6 @@ ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX6, EX6, ACRX_CMD_TRANS
 ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX7a, EX7a, ACRX_CMD_TRANSPARENT, NULL)
 ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX7b, EX7b, ACRX_CMD_TRANSPARENT, NULL)
 ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX8, EX8, ACRX_CMD_MODAL, NULL)
+ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX9, EX9, ACRX_CMD_TRANSPARENT, NULL)
+ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX10, EX10, ACRX_CMD_MODAL | ACRX_CMD_USEPICKSET, NULL)
+ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX11, EX11, ACRX_CMD_MODAL, NULL)
