@@ -27,6 +27,7 @@
 #include "common.h"
 #include "ADSKMyEntity.h"
 #include "ADSKMyCircle.h"
+#include "ADSKMyDictionary.h"
 #include "CMyDlg.h"
 
 //-----------------------------------------------------------------------------
@@ -508,6 +509,215 @@ public:
 	}
 
 #pragma endregion
+
+#pragma region Lesson12
+
+	static void ADSKMyGroupEX12() {
+		ads_name ename;
+		ads_point ptRes;
+		auto res = acedEntSel(_T("\r\nSelect object:"), ename, ptRes);
+		if (res != RTNORM) return;
+
+		AcDbObjectId objId;
+		auto stat = acdbGetObjectId(objId, ename);
+		if (stat != eOk) return;
+
+		AcDbEntity* pEnt = nullptr;
+		AcDbDictionary* pNamedDict = nullptr;
+		AcDbDictionary* pMyDict = nullptr;
+		ADSKMyDictionary* pMyDictItem = nullptr;
+		stat = acdbOpenAcDbEntity(pEnt, objId, kForRead);
+		if (stat != eOk) return;
+		{
+			if (ADSKMyCircle::desc() != pEnt->isA()) {
+				acutPrintf(_T("\r\nInvalid entity. Please select MyCircle entity."));
+				goto finally;
+			}
+
+			auto nColor = pEnt->colorIndex();
+			AcDbHandle hHandle;
+			pEnt->getAcDbHandle(hHandle);
+			TCHAR szHandle[17];
+			if (!hHandle.getIntoAsciiBuffer(szHandle)) {
+				if (stat != eOk) goto finally;
+			}
+
+			const auto pDb = acdbHostApplicationServices()->workingDatabase();
+			stat = pDb->getNamedObjectsDictionary(pNamedDict, kForWrite);
+			if (stat != eOk) goto finally;
+
+			const auto dictName = _T("MYDICTIONARY");
+			if (pNamedDict->has(dictName) == kFalse) {
+				pMyDict = new AcDbDictionary();
+				AcDbObjectId dictId;
+				stat = pNamedDict->setAt(dictName, pMyDict, dictId);
+				if (stat != eOk) goto finally;
+				acutPrintf(_T("Added MYDICTIONARY to dictionary."));
+			}
+			else {
+				stat = pNamedDict->getAt(dictName, pMyDict, kForWrite);
+				if (stat != eOk) goto finally;
+				acutPrintf(_T("MYDICTIONARY is already added."));
+			}
+
+			if (pMyDict->has(szHandle) == kFalse) {
+				pMyDictItem = new ADSKMyDictionary();
+				stat = pMyDictItem->setColor(nColor);
+				if (stat != eOk) goto finally;
+
+				AcDbObjectId dictId;
+				stat = pMyDict->setAt(szHandle, pMyDictItem, dictId);
+				if (stat != eOk) goto finally;
+
+				acutPrintf(_T("Added entry[%s]."), szHandle);
+			}
+			else {
+				acutPrintf(_T("Entry[%s] is already added."), szHandle);
+			}
+		}
+		finally:
+		if (pMyDictItem != nullptr) pMyDictItem->close();
+		if (pNamedDict != nullptr) pNamedDict->close();
+		if (pMyDict != nullptr) pMyDict->close();
+		if (pEnt != nullptr) pEnt->close();
+	}
+
+#pragma endregion
+
+#pragma region Lesson13
+
+	static void ADSKMyGroupEX13() {
+		const auto pDb = acdbHostApplicationServices()->workingDatabase();
+		AcDbDictionary* pNamedDict = nullptr;
+		AcDbDictionary* pMyDict = nullptr;
+		AcDbDictionaryIterator* pItr = nullptr;
+		auto stat = pDb->getNamedObjectsDictionary(pNamedDict, kForRead);
+		if (stat != eOk) goto finally;;
+
+		const auto dictName = _T("MYDICTIONARY");
+		if (pNamedDict->has(dictName) == kFalse) {
+			acutPrintf(_T("\r\nDictionary[%s] is not found."), dictName);
+		}
+		else {
+			stat = pNamedDict->getAt(dictName, pMyDict, kForRead);
+			if (stat != eOk) goto finally;;
+
+			Adesk::UInt16 nColor;
+			AcDbSoftPointerId objId;
+			ADSKMyDictionary* pMyDictItem;
+			pItr = pMyDict->newIterator();
+			for (; !pItr->done(); pItr->next()) {
+				stat = pItr->getObject(pMyDictItem, kForRead);
+				if (stat == eOk) {
+					pMyDictItem->color(nColor);
+					pMyDictItem->referObjId(objId);
+
+					acutPrintf(_T("\r\n%s: %d = %d"), pItr->name(), nColor, objId);
+
+					pMyDictItem->close();
+				}
+			}
+		}
+		finally:
+		if (pItr != nullptr) delete pItr;
+		if (pMyDict != nullptr) pMyDict->close();
+		if (pNamedDict != nullptr) pNamedDict->close();
+	}
+
+#pragma endregion
+
+#pragma region Lesson13
+
+	static void ADSKMyGroupEX14() {
+		ads_name entRes;
+		ads_point ptRes;
+		auto res = acedEntSel(_T("Select the linked object:"), entRes, ptRes);
+		if (res != RTNORM) return;
+
+		AcDbObjectId objId;
+		auto stat = acdbGetObjectId(objId, entRes);
+		if (stat != eOk) return;
+
+		AcDbEntity* pEnt = nullptr;
+		AcDbDictionary* pNamedDict = nullptr;
+		AcDbDictionary* pMyDict = nullptr;
+		ADSKMyDictionary* pMyDictItem = nullptr;
+		stat = acdbOpenAcDbEntity(pEnt, objId, kForRead);
+		if (stat != eOk) return;
+		{
+			if (ADSKMyCircle::desc() != pEnt->isA()) {
+				acutPrintf(_T("\r\nInvalid entity. Please select MyCircle entity."));
+				goto finally;
+			}
+
+			auto nColor = pEnt->colorIndex();
+			AcDbHandle hHandle;
+			pEnt->getAcDbHandle(hHandle);
+			TCHAR szHandle[17];
+			if (!hHandle.getIntoAsciiBuffer(szHandle)) {
+				if (stat != eOk) goto finally;
+			}
+
+			const auto pDb = acdbHostApplicationServices()->workingDatabase();
+			stat = pDb->getNamedObjectsDictionary(pNamedDict, kForWrite);
+			if (stat != eOk) goto finally;
+
+			const auto dictName = _T("MYDICTIONARY");
+			if (pNamedDict->has(dictName) == kFalse) {
+				pMyDict = new AcDbDictionary();
+				AcDbObjectId dictId;
+				stat = pNamedDict->setAt(dictName, pMyDict, dictId);
+				if (stat != eOk) goto finally;
+				acutPrintf(_T("Added MYDICTIONARY to dictionary."));
+			}
+			else {
+				stat = pNamedDict->getAt(dictName, pMyDict, kForWrite);
+				if (stat != eOk) goto finally;
+				acutPrintf(_T("MYDICTIONARY is already added."));
+			}
+
+			AcDbObjectId dictId;
+			if (pMyDict->has(szHandle) == kFalse) {
+				pMyDictItem = new ADSKMyDictionary();
+				stat = pMyDictItem->setColor(nColor);
+				if (stat != eOk) goto finally;
+				stat = pMyDictItem->setReferObjId(objId);
+				if (stat != eOk) goto finally;
+				
+				stat = pMyDict->setAt(szHandle, pMyDictItem, dictId);
+				if (stat != eOk) goto finally;
+
+				acutPrintf(_T("Added entry[%s]."), szHandle);
+			}
+			else {
+				acutPrintf(_T("Entry[%s] is already added."), szHandle);
+			}
+
+			res = acedEntSel(_T("Select the referenced object:"), entRes, ptRes);
+			if (res != RTNORM) goto finally;
+
+			stat = acdbGetObjectId(objId, entRes);
+			if (stat != eOk) goto finally;
+
+			pEnt->close();
+			stat = acdbOpenAcDbEntity(pEnt, objId, kForWrite);
+			if (stat != eOk) goto finally;
+
+			if (ADSKMyCircle::desc() == pEnt->isA()) {
+				acutPrintf(_T("The MyCircle can not be selected."));
+				goto finally;
+			}
+
+			pEnt->addPersistentReactor(dictId);
+		}
+		finally:
+		if (pMyDictItem != nullptr) pMyDictItem->close();
+		if (pNamedDict != nullptr) pNamedDict->close();
+		if (pMyDict != nullptr) pMyDict->close();
+		if (pEnt != nullptr) pEnt->close();
+	}
+
+#pragma endregion
 } ;
 
 IMPLEMENT_ARX_ENTRYPOINT(ARXTrainingApp)
@@ -523,3 +733,6 @@ ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX8, EX8, ACRX_CMD_MODAL
 ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX9, EX9, ACRX_CMD_TRANSPARENT, NULL)
 ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX10, EX10, ACRX_CMD_MODAL | ACRX_CMD_USEPICKSET, NULL)
 ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX11, EX11, ACRX_CMD_MODAL, NULL)
+ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX12, EX12, ACRX_CMD_MODAL | ACRX_CMD_USEPICKSET, NULL)
+ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX13, EX13, ACRX_CMD_MODAL, NULL)
+ACED_ARXCOMMAND_ENTRY_AUTO(ARXTrainingApp, ADSKMyGroup, EX14, EX14, ACRX_CMD_MODAL | ACRX_CMD_USEPICKSET, NULL)
